@@ -125,4 +125,44 @@ binary = Sob \cup S \cup B
 </ul>
 <br>
 
-4. **Polynomial fit**:
+4. **Polynomial fit**: After the threshold, we fit a quadratic polynomial to each of the lane lines, this step will allow us to detect curves in the road.
+<ul>
+<ul>
+<li> First we need to calculate a histogram in the bottom half of the image by summing all the pixels in the y axis, two peaks will be detected and will be the base for the left and right lines. To avoid noise, margins (<img src="https://render.githubusercontent.com/render/math?math=\alpha">) in the left and right edges were added.
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0A%5Cbegin%7Btikzpicture%7D%5Bisosceleles%20trapezium%2F.style%20args%3D%7Bof%20width%20%231%20and%20height%20%232%0Aand%20name%20%233%7D%7Binsert%20path%3D%7B%0A(45%3A%7B%231%2Fsqrt(2)%7D)%20coordinate(%233-TR)%20--%20(-45%3A%7Bsqrt(%232*%232-%231*%231%2F2)%7D)%20coordinate(%233-BR)%20%0A--%20(-135%3A%7Bsqrt(%232*%232-%231*%231%2F2)%7D)%20coordinate(%233-BL)%20--%20(135%3A%7B%231%2Fsqrt(2)%7D)%20coordinate(%233-TL)%20--%20cycle%7D%7D%5D%0A%5Cdraw%5Bisosceleles%20trapezium%3Dof%20width%201%20and%20height%203%20and%20name%20my%20trap%5D%3B%0A%5Cdraw%5Blatex-latex%5D%20(%5Bxshift%3D-10mm%2C%20yshift%3D12mm%5Dmy%20trap-TL%20-%7C%20my%20trap-BL)%20--%20%0A(%5Bxshift%3D-10mm%5Dmy%20trap-BL)%20node%5Bmidway%2Cfill%3Dwhite%5D%20%7B%24h%24%7D%3B%0A%5Cdraw%5Bdraw%3Dblack%20and%20name%20myRect%5D%20(-2.8%2C%201.7)%20rectangle%20%2B%2B(5.5%2C-3.75)%3B%0A%5Cdraw%5Blatex-latex%5D%20(%5Bxshift%3D-8mm%2C%20yshift%3D-3mm%5D%20my%20trap-BL)%20--%20(%5Byshift%3D-3mm%5D%20my%20trap-BL)%0Anode%5Bmidway%2Cfill%3Dwhite%5D%20%7B%24%5Calpha%24%7D%3B%0A%5Cdraw%5Blatex-latex%5D%20(%5Byshift%3D-3mm%5D%20my%20trap-BL)%20--%20(%5Byshift%3D-3mm%5D%20my%20trap-BR)%0Anode%5Bmidway%2Cfill%3Dwhite%5D%20%7B%24b_i%24%7D%3B%0A%5Cend%7Btikzpicture%7D%0A" alt="
+\begin{tikzpicture}[isosceleles trapezium/.style args={of width #1 and height #2
+and name #3}{insert path={
+(45:{#1/sqrt(2)}) coordinate(#3-TR) -- (-45:{sqrt(#2*#2-#1*#1/2)}) coordinate(#3-BR) 
+-- (-135:{sqrt(#2*#2-#1*#1/2)}) coordinate(#3-BL) -- (135:{#1/sqrt(2)}) coordinate(#3-TL) -- cycle}}]
+\draw[isosceleles trapezium=of width 1 and height 3 and name my trap];
+\draw[latex-latex] ([xshift=-10mm, yshift=12mm]my trap-TL -| my trap-BL) -- 
+([xshift=-10mm]my trap-BL) node[midway,fill=white] {$h$};
+\draw[draw=black and name myRect] (-2.8, 1.7) rectangle ++(5.5,-3.75);
+\draw[latex-latex] ([xshift=-8mm, yshift=-3mm] my trap-BL) -- ([yshift=-3mm] my trap-BL)
+node[midway,fill=white] {$\alpha$};
+\draw[latex-latex] ([yshift=-3mm] my trap-BL) -- ([yshift=-3mm] my trap-BR)
+node[midway,fill=white] {$b_i$};
+\end{tikzpicture}
+" /></p>
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0A%5Ctexttt%7Bwhere%20%7D%20%5Calpha%20%3D%20%5Cfrac%7Bimg_w%7D%7B4%7D%0A" alt="
+\texttt{where } \alpha = \frac{img_w}{4}
+" /></p>
+
+<li> Next step we use the sliding window algoritm to fit 15 windows in each line starting from the base lines until the top of the image in order to look for all the pixels related to the lines. Once all pixels for each line are detected we fit a second degree polynomial in each set of the lines by minimizing the squared error.
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0Ay_k%20%3D%20x_k%5Enp_0%20%2B%20...%20%2B%20x_kp_%7Bn-1%7D%20%2B%20p_n%0A" alt="
+y_k = x_k^np_0 + ... + x_kp_{n-1} + p_n
+" /></p>
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0AE%20%3D%20%5Csum%5Ek%20%7Cp(x_j)-y_j%7C%5E2%0A" alt="
+E = \sum^k |p(x_j)-y_j|^2
+" /></p>
+
+<li> For optimization, once on the next frame we don't need to blindly look again for the lines, but use previous information. Adding a margin in the polynomial equation we can create a region of interest customized for every frame that follows the line in the previous frame.
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0AROI%20%3D%20%5Cbegin%7Bcases%7D%0AAx%5E2%20%2B%20b%5Ex%20%2B%20c%20-%20margin%20%5C%5C%0AAx%5E2%20%2B%20b%5Ex%20%2B%20c%20%2B%20margin%0A%5Cend%7Bcases%7D%0A" alt="
+ROI = \begin{cases}
+Ax^2 + b^x + c - margin \\
+Ax^2 + b^x + c + margin
+\end{cases}
+" /></p>
+</ul>
+</ul>
+<br>
