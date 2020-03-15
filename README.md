@@ -52,5 +52,72 @@ The approach consisted of X steps:
 </ul>
 </ul>
 
-3. **Threshold**
-Thresholding is a method of segmenting image. In this project we use a combined threshold (sobel and colorspaces) to create a binary image where the lane lines pixels are activated.
+3. **Thresholding**: Thresholding is a method of segmenting image. In this project we use a combined threshold (sobel and colorspaces) to create a binary image where the lane line pixels are activated.
+<ul>
+<ul>
+<li>Convolute a sobel of kernel size of 5 in the x direction with the image:
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0ASob%20%26%3D%20s_x%20%5Ccircledast%20img%20%0A" alt="
+Sob &amp;= s_x \circledast img 
+" /></p>
+  
+<li>Get S channel from HLS colorspace transform:
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0AV_%7Bmax%7D%20%5Cleftarrow%20%7Bmax%7D(R%2CG%2CB)%20%5C%3B%5C%3B%5C%3B%5C%3B%0AV_%7Bmin%7D%20%5Cleftarrow%20%7Bmax%7D(R%2CG%2CB)%0A" alt="
+V_{max} \leftarrow {max}(R,G,B) \;\;\;\;
+V_{min} \leftarrow {max}(R,G,B)
+" /></p>
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0AL%20%5Cleftarrow%20%5Cfrac%7BV_%7Bmax%7D%20%2B%20V_%7Bmin%7D%7D%7B2%7D%20%5C%3B%5C%3B%5C%3B%5C%3B%5C%3B%5C%3B%5C%3B%5C%3B%0AS%20%5Cleftarrow%20%5Cbegin%7Bcases%7D%20%0A%5Cdfrac%7BV_%7Bmax%7D%20-%20V_%7Bmin%7D%7D%7BV_%7Bmax%7D%20%2B%20V_%7Bmin%7D%7D%20%26%20if%20%5C(L%20%3C%200.5%5C)%20%5C%5C%20%5C%5C%0A%5Cfrac%7BV_%7Bmax%7D%20-%20V_%7Bmin%7D%7D%7B2%20-%20(V_%7Bmax%7D%20%2B%20V_%7Bmin%7D)%7D%20%26%20if%20%5C(L%20%5Cge%200.5%5C)%0A%5Cend%7Bcases%7D%0A" alt="
+L \leftarrow \frac{V_{max} + V_{min}}{2} \;\;\;\;\;\;\;\;
+S \leftarrow \begin{cases} 
+\dfrac{V_{max} - V_{min}}{V_{max} + V_{min}} &amp; if \(L &lt; 0.5\) \\ \\
+\frac{V_{max} - V_{min}}{2 - (V_{max} + V_{min})} &amp; if \(L \ge 0.5\)
+\end{cases}
+" /></p>
+  
+<li>Get B channel from LAB colorspace transform:
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0A%5Cbegin%7Bbmatrix%7D%7BX%20%5C%5C%20Y%20%5C%5C%20Z%7D%20%5Cend%7Bbmatrix%7D%0A%5Cleftarrow%0A%5Cbegin%7Bbmatrix%7D%7B0.412453%20%26%200.357580%20%26%200.180423%20%5C%5C%200.212671%20%26%200.715160%20%26%200.072169%20%5C%5C%200.019334%20%26%200.119193%20%26%200.950227%7D%5Cend%7Bbmatrix%7D%0A%5Ccdot%20%5Cbegin%7Bbmatrix%7D%7BR%20%5C%5CG%20%5C%5C%20B%7D%5Cend%7Bbmatrix%7D%0A" alt="
+\begin{bmatrix}{X \\ Y \\ Z} \end{bmatrix}
+\leftarrow
+\begin{bmatrix}{0.412453 &amp; 0.357580 &amp; 0.180423 \\ 0.212671 &amp; 0.715160 &amp; 0.072169 \\ 0.019334 &amp; 0.119193 &amp; 0.950227}\end{bmatrix}
+\cdot \begin{bmatrix}{R \\G \\ B}\end{bmatrix}
+" /></p>
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0AX%20%5Cleftarrow%20X%2FX_n%2C%20%5Ctext%7Bwhere%7D%20X_n%20%3D%200.950456%20%5C%3B%5C%3B%5C%3B%5C%3B%5C%3B%5C%3B%5C%3B%5C%3B%5C%3B%0AZ%20%5Cleftarrow%20Z%2FZ_n%2C%20%5Ctext%7Bwhere%7D%20Z_n%20%3D%201.088754%0A" alt="
+X \leftarrow X/X_n, \text{where} X_n = 0.950456 \;\;\;\;\;\;\;\;\;
+Z \leftarrow Z/Z_n, \text{where} Z_n = 1.088754
+" /></p>
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0AL%20%5Cleftarrow%20%5Cbegin%7Bcases%7D%20116*Y%5E%7B1%2F3%7D-16%20%26%20for%20%5C%20Y%3E0.008856%5C%20%5C%5C%20%0A903.3*Y%20%26%20for%20%5C%20Y%20%5Cle%200.008856%5C%7D%20%5Cend%7Bcases%7D%0A" alt="
+L \leftarrow \begin{cases} 116*Y^{1/3}-16 &amp; for \ Y&gt;0.008856\ \\ 
+903.3*Y &amp; for \ Y \le 0.008856\} \end{cases}
+" /></p>
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0AA%20%5Cleftarrow%20500%20(f(X)-f(Y))%20%2B%20delta%20%5C%3B%5C%3B%5C%3B%5C%3B%5C%3B%5C%3B%5C%3B%5C%3B%5C%3B%0AB%20%5Cleftarrow%20200%20(f(Y)-f(Z))%20%2B%20delta%0A" alt="
+A \leftarrow 500 (f(X)-f(Y)) + delta \;\;\;\;\;\;\;\;\;
+B \leftarrow 200 (f(Y)-f(Z)) + delta
+" /></p>
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0Af(t)%3D%20%5Cbegin%7Bcases%7D%20t%5E%7B1%2F3%7D%20%26%20for%20%5C%20t%3E0.008856%5C)%20%5C%5C%0A7.787%20t%2B16%2F116%20%26%20for%20%5C%20t%5Cleq%200.008856%5C)%20%5Cend%7Bcases%7D%0A" alt="
+f(t)= \begin{cases} t^{1/3} &amp; for \ t&gt;0.008856\) \\
+7.787 t+16/116 &amp; for \ t\leq 0.008856\) \end{cases}
+" /></p>
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0Adelta%20%3D%20%5Cbegin%7Bcases%7D%20128%20%26%20%5Ctexttt%7Bfor%208-bit%20images%7D%20%5C%5C%0A0%20%26%20%5Ctexttt%7Bfor%20floating-point%20images%7D%20%5Cend%7Bcases%7D%0A" alt="
+delta = \begin{cases} 128 &amp; \texttt{for 8-bit images} \\
+0 &amp; \texttt{for floating-point images} \end{cases}
+" /></p>
+  
+  <li> Every channel is then binarized using the next criteria:
+ <p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0ASob%20%5Cleftarrow%20%5Cbegin%7Bcases%7D%20%0A1%20%26%20if%20%5C%20%2040%20%3C%3D%20Sob%20%3C%3D%20255%20%5C%5C%20%0A0%20%26%20otherwise%20%5Cend%7Bcases%7D%0A%5C%20%5C%20%5C%20%0AS%20%5Cleftarrow%20%5Cbegin%7Bcases%7D%20%20%0A1%20%26%20if%20%5C%20%2070%20%3C%3D%20S%20%3C%3D%20255%20%5C%5C%20%0A0%20%26%20otherwise%20%5Cend%7Bcases%7D%0A%5C%20%5C%20%5C%0AB%20%5Cleftarrow%20%5Cbegin%7Bcases%7D%20%0A1%20%26%20if%20%5C%20%20140%20%3C%3D%20B%20%3C%3D%20255%20%5C%5C%20%0A0%20%26%20otherwise%20%5Cend%7Bcases%7D%0A" alt="
+Sob \leftarrow \begin{cases} 
+1 &amp; if \  40 &lt;= Sob &lt;= 255 \\ 
+0 &amp; otherwise \end{cases}
+\ \ \ 
+S \leftarrow \begin{cases}  
+1 &amp; if \  70 &lt;= S &lt;= 255 \\ 
+0 &amp; otherwise \end{cases}
+\ \ \
+B \leftarrow \begin{cases} 
+1 &amp; if \  140 &lt;= B &lt;= 255 \\ 
+0 &amp; otherwise \end{cases}
+" /></p>
+<li> Finally, the binary image is made by the union of the 3 channels:
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0Abinary%20%3D%20Sob%20%5Ccup%20S%20%5Ccup%20B%0A" alt="
+binary = Sob \cup S \cup B
+" /></p>
+  
+4. **Polynomial fit**:
