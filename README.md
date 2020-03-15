@@ -35,6 +35,7 @@ The approach consisted of X steps:
 <p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/y_%7Bcorrected%7D%20%3D%20y%20%2B%20%5Bp_1(r%5E2%20%2B%202y%5E2)%20%2B%202p_2xy%5D" alt="y_{corrected} = y + [p_1(r^2 + 2y^2) + 2p_2xy]" /></p>
 </ul>
 </ul>
+<br>
 
 2. **Perspective transform**: A perspective transform maps the points in a given image to different, desired, image points with a new perspective. In this project a bird’s-eye view transform that let’s us view a lane from above was used (it is useful for calculating curvature in the next steps).
 <ul>
@@ -51,6 +52,7 @@ The approach consisted of X steps:
 \texttt{dst} = \begin{bmatrix} 450 &amp; img_h \\ 450 &amp; 0 \\ img_w - 450 &amp; 0 \\ img_w - 450 &amp; img_h\end{bmatrix}" /></p>
 </ul>
 </ul>
+<br>
 
 3. **Thresholding**: Thresholding is a method of segmenting image. In this project we use a combined threshold (sobel and colorspaces) to create a binary image where the lane line pixels are activated.
 <ul>
@@ -119,5 +121,8 @@ B \leftarrow \begin{cases}
 <p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0Abinary%20%3D%20Sob%20%5Ccup%20S%20%5Ccup%20B%0A" alt="
 binary = Sob \cup S \cup B
 " /></p>
-  
+</ul>
+</ul>
+<br>
+
 4. **Polynomial fit**:
