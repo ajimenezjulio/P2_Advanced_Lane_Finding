@@ -21,7 +21,7 @@ The goals / steps of this project are the following:
 
 ### 1. Approach
 
-The approach consisted of X steps:
+The approach consisted of 6 steps:
 
 1. **Distortion correction**: Light rays often bend a little too much or too little at the edges of the curved lenses in real cameras, this creates a *radial distortion* and if the camera’s lens is not aligned perfectly parallel to the imaging plane a *tangential distortion* also occurs. In this project the distortion coefficients were calculated to correct radial distortion using a 9 x 6 corners chessboard images.
 <ul>
@@ -157,12 +157,48 @@ E = \sum^k |p(x_j)-y_j|^2
 " /></p>
 
 <li> For optimization, once on the next frame we don't need to blindly look again for the lines, but use previous information. Adding a margin in the polynomial equation we can create a region of interest customized for every frame that follows the line in the previous frame.
-<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0AROI%20%3D%20%5Cbegin%7Bcases%7D%0AAx%5E2%20%2B%20b%5Ex%20%2B%20c%20-%20margin%20%5C%5C%0AAx%5E2%20%2B%20b%5Ex%20%2B%20c%20%2B%20margin%0A%5Cend%7Bcases%7D%0A" alt="
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0AROI%20%3D%20%5Cbegin%7Bcases%7D%0Aay%5E2%20%2B%20bx%20%2B%20c%20-%20margin%20%5C%5C%0Aay%5E2%20%2B%20bx%20%2B%20c%20%2B%20margin%0A%5Cend%7Bcases%7D%0A" alt="
 ROI = \begin{cases}
-Ax^2 + b^x + c - margin \\
-Ax^2 + b^x + c + margin
+ay^2 + bx + c - margin \\
+ay^2 + bx + c + margin
 \end{cases}
 " /></p>
 </ul>
 </ul>
+<br>
+
+5. **Polynomial fit validation**: In order to determine if the found fit is valid we need to met some criteria.
+<ul>
+<ul>
+<li> In case that a previous fit exists we need to compare the difference between coefficients, if the difference is too big, then it's not a valid one (differences in line coefficients shouldn't vary that much from frame to frame).
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0Afit%20%5Cleftarrow%0A%5Cbegin%7Bcases%7D%0Ainvalid%20%26%20if%20%5C%20%5C%20a%20%3E%200.001%20%5C%20%5Coplus%20%5C%20b%20%3E%201%20%5C%20%5Coplus%20%5C%20c%20%3E%20100%0A%5C%5C%0Avalid%20%26%20otherwise%0A%5Cend%7Bcases%7D%0A" alt="
+fit \leftarrow
+\begin{cases}
+invalid &amp; if \ \ a &gt; 0.001 \ \oplus \ b &gt; 1 \ \oplus \ c &gt; 100
+\\
+valid &amp; otherwise
+\end{cases}
+" /></p>
+  
+<li> In order to make a smooth transition the fit in the current frame will be equal to an average of the previous 5 fits.
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0Acurrent%5C_fit%20%3D%20%5Cfrac%7B%5Csum_i%5E4%20fit_i%7D%7B5%7D%0A" alt="
+current\_fit = \frac{\sum_i^4 fit_i}{5}
+" /></p>
+</ul>
+</ul>
+<br>
+
+6. **Measuring curvature**: Having the coefficients we can calculate the radius of curvature and distance from center at any point <img src="https://render.githubusercontent.com/render/math?math=x"> of the function <img src="https://render.githubusercontent.com/render/math?math=x=f(y)">.
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0AR_%7Bcurve%7D%20%3D%20%5Cfrac%7B%5Cleft(%201%20%2B%20%5Cleft(%20%5Cfrac%7Bdx%7D%7Bdy%7D%20%5Cright)%5E2%20%5Cright)%5E%5Cfrac%7B3%7D%7B2%7D%20%7D%0A%7B%5Cleft%7C%20%5Cfrac%7Bd%5E2x%7D%7Bd%5E2y%7D%20%5Cright%7C%7D%0A" alt="
+R_{curve} = \frac{\left( 1 + \left( \frac{dx}{dy} \right)^2 \right)^\frac{3}{2} }
+{\left| \frac{d^2x}{d^2y} \right|}
+" /></p>
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0Af'(y)%3D%20%5Cfrac%7Bdx%7D%7Bdy%7D%20%3D%202ay%20%2B%20b%20%5C%20%5C%20%5C%20%5C%20%5C%20%5C%20%5C%20%5C%20%5C%0Af''(y)%3D%20%5Cfrac%7Bd%5E2x%7D%7Bd%5E2y%7D%20%3D%202a%0A" alt="
+f'(y)= \frac{dx}{dy} = 2ay + b \ \ \ \ \ \ \ \ \
+f''(y)= \frac{d^2x}{d^2y} = 2a
+" /></p>
+<p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0AR_%7Bcurve%7D%20%3D%20%5Cfrac%7B%5Cleft(%201%20%2B%20%5Cleft(%202ay%20%2B%20b%20%5Cright)%5E2%20%5Cright)%5E%5Cfrac%7B3%7D%7B2%7D%20%7D%0A%7B%5Cleft%7C%202a%20%5Cright%7C%7D%0A" alt="
+R_{curve} = \frac{\left( 1 + \left( 2ay + b \right)^2 \right)^\frac{3}{2} }
+{\left| 2a \right|}
+" /></p>
 <br>
