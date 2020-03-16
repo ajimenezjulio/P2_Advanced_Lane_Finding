@@ -167,7 +167,7 @@ ay^2 + bx + c + margin
 </ul>
 <br>
 
-5. **Polynomial fit validation**: In order to determine if the found fit is valid we need to met some criteria.
+5. **Polynomial fit validation**: In order to determine if the fit found is valid we need to met some criteria.
 <ul>
 <ul>
 <li> In case that a previous fit exists we need to compare the difference between coefficients, if the difference is too big, then it's not a valid one (differences in line coefficients shouldn't vary that much from frame to frame).
@@ -188,7 +188,7 @@ current\_fit = \frac{\sum_i^4 fit_i}{5}
 </ul>
 <br>
 
-6. **Measuring curvature**: Having the coefficients we can calculate the radius of curvature and distance from center at any point <img src="https://render.githubusercontent.com/render/math?math=x"> of the function <img src="https://render.githubusercontent.com/render/math?math=x=f(y)">.
+6. **Measuring curvature**: Having the coefficients we can calculate the radius of curvature at any point <img src="https://render.githubusercontent.com/render/math?math=x"> of the function <img src="https://render.githubusercontent.com/render/math?math=x=f(y)">.
 <p align="center" style="text-align: center;"><img align="center" src="https://tex.s2cms.ru/svg/%0AR_%7Bcurve%7D%20%3D%20%5Cfrac%7B%5Cleft(%201%20%2B%20%5Cleft(%20%5Cfrac%7Bdx%7D%7Bdy%7D%20%5Cright)%5E2%20%5Cright)%5E%5Cfrac%7B3%7D%7B2%7D%20%7D%0A%7B%5Cleft%7C%20%5Cfrac%7Bd%5E2x%7D%7Bd%5E2y%7D%20%5Cright%7C%7D%0A" alt="
 R_{curve} = \frac{\left( 1 + \left( \frac{dx}{dy} \right)^2 \right)^\frac{3}{2} }
 {\left| \frac{d^2x}{d^2y} \right|}
