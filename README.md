@@ -202,3 +202,27 @@ R_{curve} = \frac{\left( 1 + \left( 2ay + b \right)^2 \right)^\frac{3}{2} }
 {\left| 2a \right|}
 " /></p>
 <br>
+
+
+### 2. Shortcomings
+
+There are some flaws in this approach:
+
+* It is not illumination invariant, so the lack of contrast and light would result in a malfunction of the program.
+
+* Thresholding is without a doubt the core of the problem, playing with multiple thresholdings make the model more robust but also can detect undesired patterns and objects that will lead to a wrong lane detection.
+
+* A fixed camera position and consistent image size are assumed, so positioning the camera at a different angle and handling different image sizes would have undesirable results.
+
+<br>
+
+
+### 3. Improvements
+
+Some points of the pipeline can be improved.
+
+1. **Perspective Transform**: The images and videos have a fixed size and perspective, right now the 4 selected points for the transform are fixed, so a better way to select them automatically based on features to handle multiple sizes and camera angles will be necessary for a more robust approach
+
+2. **Thresholding**: Without a doubt trhesholding is the core of the algorithm, a more robust method for illumination, rotation and translation invariance should be developed for a real application. This approach showed a good performance for the *project_video* and a fairly average for the *challenge_video*, but its completely useless for the *harder_challenge_video*.
+
+3. **Polynomal fit**: Sliding windows algorithm and its optimization for looking around previous polynomial are pretty robust methods for lane line detection, minor improvements could be done here. However, these methods are strongly dependant on the thresholding for finding a good fit, i.e. we are as strong as the weakest link.
